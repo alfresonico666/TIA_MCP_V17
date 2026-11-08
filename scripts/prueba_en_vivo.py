@@ -28,6 +28,7 @@ from tia_mcp.openness import (  # noqa: E402
     bloques,
     conocimiento,
     hardware,
+    hmi,
     proyecto,
     red,
     tags,
@@ -35,10 +36,37 @@ from tia_mcp.openness import (  # noqa: E402
 )
 from tia_mcp.openness.compilacion import compilar  # noqa: E402
 from tia_mcp.servidor import crear_servidor  # noqa: E402
+from tia_mcp.simaticml.estilos import maquina_estados as me  # noqa: E402
+from tia_mcp.simaticml.hmi import generador as gen_hmi  # noqa: E402
 from tia_mcp.simaticml.lector import leer_bloque  # noqa: E402
 from tia_mcp.simaticml.texto import bloque_como_texto  # noqa: E402
 
 CPU = "6ES7 214-1BG40-0XB0/V4.5"  # S7-1214C AC/DC/RLY
+KTP400 = "6AV2 123-2DB03-0AX0/17.0.0.0"  # KTP400 Basic PN
+
+MAQUINA = {
+    "nombre": "FB_Motor_Moore", "estilo": "moore", "lenguaje": "kop",
+    "entradas": [{"nombre": "Marcha"}, {"nombre": "Paro"}, {"nombre": "Termico_OK"}, {"nombre": "Reset"}],
+    "salidas": [{"nombre": "Motor"}, {"nombre": "Piloto_Falla"}], "inicial": "REPOSO",
+    "estados": [{"nombre": "REPOSO", "valor": 0}, {"nombre": "MARCHA", "valor": 10, "salidas": {"Motor": True}},
+                {"nombre": "FALLA", "valor": 90, "salidas": {"Piloto_Falla": True}}],
+    "transiciones": [{"desde": "*", "hacia": "FALLA", "si": ["NOT Termico_OK"]},
+                     {"desde": "REPOSO", "hacia": "MARCHA", "si": ["Marcha", "NOT Paro"]},
+                     {"desde": "MARCHA", "hacia": "REPOSO", "si": ["Paro"]},
+                     {"desde": "FALLA", "hacia": "REPOSO", "si": ["Reset", "Termico_OK"]}],
+}
+
+PANTALLA = {"nombre": "Principal", "numero": 1, "fondo": "0, 0, 0", "objetos": [
+    {"tipo": "rectangulo", "nombre": "Panel", "x": 127, "y": 0, "ancho": 353, "alto": 271, "fondo": "247, 243, 247"},
+    {"tipo": "texto", "nombre": "Titulo", "x": 133, "y": 0, "ancho": 343, "alto": 48, "texto": "PRUEBA MCP",
+     "fuente": {"tamano": 24, "estilo": "Bold"}},
+    {"tipo": "boton", "nombre": "Btn_Marcha", "x": 140, "y": 200, "ancho": 100, "alto": 40, "texto": "MARCHA",
+     "al_pulsar": [["SetBit", "H_Marcha"]], "al_soltar": [["ResetBit", "H_Marcha"]]},
+    {"tipo": "circulo", "nombre": "Led", "x": 300, "y": 100, "ancho": 33, "alto": 33,
+     "apariencia": {"tag": "H_Motor", "rangos": [[0, "51, 51, 51"], [1, "0, 255, 0"]]}},
+    {"tipo": "campo_simbolico", "nombre": "Estilo", "tag": "H_Estilo", "lista": "Estilos", "x": 140, "y": 60,
+     "ancho": 150, "alto": 30, "modo": "entrada_salida"},
+    {"tipo": "fecha_hora", "nombre": "Reloj", "x": 395, "y": 250, "ancho": 85, "alto": 22}]}
 
 UDT_MOTOR = '''TYPE "UDT_Motor"
 VERSION : 0.1
@@ -123,7 +151,7 @@ class Prueba:
             return None
 
 
-def main() -> int:
+def main() -> int:  # noqa: PLR0915 - guion lineal de pasos
     parser = argparse.ArgumentParser()
     parser.add_argument("--interfaz", action="store_true")
     args = parser.parse_args()
@@ -136,7 +164,7 @@ def main() -> int:
     def plc():
         return hardware.plc(s)
 
-    ej(p.paso, "Conectar a TIA", s.conectar, args.interfaz)
+    ej(p.paso, "Conectar a TIA (instancia propia)", s.conectar, args.interfaz, None, True)
     ej(p.paso, "Crear proyecto", proyecto.crear, s, str(PRUEBAS), nombre)
     ej(p.paso, "Agregar CPU 1214C AC/DC/RLY", hardware.agregar_plc, s, "PLC_1", CPU)
     ej(p.paso, "Crear tags", lambda: tags.crear_o_actualizar(s, plc(), "Tabla de variables estándar", [
@@ -180,6 +208,24 @@ def main() -> int:
     ej(p.paso, "Red: configurar ET 200SP", red.configurar_interfaz, s, "ET200SP_1", "192.168.0.20", None, "et200sp-1")
     ej(p.paso, "Red: interfaces", red.interfaces, s)
     ej(p.paso, "Red: direcciones E/S del PLC", red.direcciones_io, s, "PLC_1")
+    ej(p.paso, "Máquina de estados Moore (KOP)", lambda: ctx.programador.crear_kop(
+        plc(), me.a_kop(me.leer_maquina(MAQUINA))))
+    ej(p.paso, "Máquina de estados Mealy (SCL)", lambda: ctx.programador.importar_scl(
+        plc(), me.a_scl(me.leer_maquina({**MAQUINA, "nombre": "FB_Motor_Mealy", "estilo": "mealy",
+                                          "lenguaje": "scl"}))))
+    ej(p.paso, "HMI: agregar KTP400 Basic", hmi.agregar_panel, s, "HMI_1", KTP400)
+    ej(p.paso, "HMI: red con el PLC", hmi.conectar_a_plc, s, "HMI_1", "PLC_1")
+    ej(p.paso, "HMI: tags internos", lambda: hmi.importar(s, hmi.panel(s), "tags", gen_hmi.tabla_tags_xml(
+        "Tags_Prueba", [{"nombre": "H_Marcha"}, {"nombre": "H_Motor"}, {"nombre": "H_Estilo", "tipo": "Int"}],
+        hmi.culturas_proyecto(s))))
+    ej(p.paso, "HMI: lista de textos", lambda: hmi.importar(s, hmi.panel(s), "lista_textos", gen_hmi.lista_textos_xml(
+        "Estilos", {1: "Banderas", 2: "Moore", 3: "Mealy"}, hmi.culturas_proyecto(s))))
+    ej(p.paso, "HMI: pantalla generada", lambda: hmi.importar(s, hmi.panel(s), "pantalla", gen_hmi.pantalla_xml(
+        PANTALLA, hmi.culturas_proyecto(s))))
+    ej(p.paso, "HMI: leer pantalla", lambda: hmi.leer(s, hmi.panel(s), "pantalla", "Principal"))
+    # Sin conexión ni pantalla inicial (manuales en V17) la HMI compila con 1 error esperado: se informa.
+    ej(p.paso, "HMI: compilar (esperado: falta pantalla inicial)",
+       lambda: hmi.compilar_panel(s, hmi.panel(s)).resumen())
     ej(p.paso, "Exportar programa para Git", conocimiento.exportar_programa, s, str(PRUEBAS / "export"))
     ej(p.paso, "Guardar", proyecto.guardar, s)
     zap = PRUEBAS / "zap" / "PruebaMCP_v1.zap17"

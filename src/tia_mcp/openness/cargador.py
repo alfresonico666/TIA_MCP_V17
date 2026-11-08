@@ -40,6 +40,19 @@ def api(config: Configuracion) -> ApiOpenness:
     return ApiOpenness(engineering=_tipos_engineering(), sistema=_tipos_sistema())
 
 
+@cache
+def tipo_hmi_target(config: Configuracion):
+    """Tipo HmiTarget (WinCC Basic/Comfort/Advanced) de Siemens.Engineering.Hmi.dll, cargada bajo demanda."""
+    api(config)
+    import clr  # noqa: PLC0415
+
+    clr.AddReference(str(config.dll_openness_hmi))
+    from Siemens.Engineering.Hmi import HmiTarget  # noqa: PLC0415
+
+    log.info("Openness HMI cargado desde %s", config.dll_openness_hmi)
+    return HmiTarget
+
+
 def _iniciar_runtime_netfx() -> None:
     from pythonnet import load  # noqa: PLC0415
 

@@ -6,8 +6,10 @@ from typing import Any, Literal
 from mcp.server.mcpserver import MCPServer
 
 from .. import formato
+from ..errores import EntradaInvalida
 from ..openness import bloques, conocimiento, hardware, tipos
 from ..openness.compilacion import compilar
+from ..simaticml.estilos import maquina_estados
 from ..simaticml.kop.instrucciones import resumen_catalogo
 from ..simaticml.lector import leer_bloque
 from ..simaticml.texto import bloque_como_texto
@@ -66,7 +68,8 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
 
     @servidor.tool(annotations=ESCRITURA)
     async def tia_programar(action: Literal["crear_kop", "importar_scl", "importar_xml", "crear_db_instancia",
-                                            "borrar_bloque", "ayuda_kop"],
+                                            "borrar_bloque", "ayuda_kop", "crear_maquina_estados",
+                                            "ayuda_maquina_estados"],
                             plc: str | None = None, especificacion: dict[str, Any] | None = None,
                             codigo: str | None = None, xml: str | None = None, carpeta: str | None = None,
                             nombre: str | None = None, fb: str | None = None, numero: int | None = None,
@@ -79,6 +82,9 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
         - importar_scl: `codigo` SCL con uno o varios FUNCTION_BLOCK/FUNCTION/DATA_BLOCK/TYPE.
           Ideal para PID, cálculos, máquinas de estado y UDT.
         - importar_xml: `xml` SimaticML completo.
+        - crear_maquina_estados: `especificacion` de una máquina de estados Moore o Mealy → FB en KOP
+          (comparadores + MOVE) o SCL (CASE), más su diagrama de estados (Mermaid) para documentar.
+          Ver action='ayuda_maquina_estados'. Para programación por BANDERAS (S/R) usa crear_kop.
         - crear_db_instancia: `nombre` del DB + `fb` [+ `numero`].
         - borrar_bloque: `nombre`.
         `carpeta` = carpeta de bloques destino ('Motores/Bombas'), se crea si no existe.
@@ -86,6 +92,8 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
         def ejecutar():
             if action == "ayuda_kop":
                 return "\n".join([AYUDA_KOP, "", "Catálogo de cajas KOP:", *resumen_catalogo()])
+            if action == "ayuda_maquina_estados":
+                return maquina_estados.__doc__ or ""
             ctx.exigir_escritura()
             sw = hardware.plc(ctx.sesion, plc)
             p = ctx.programador
@@ -98,13 +106,17 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
             if action == "importar_xml":
                 return p.importar_xml(sw, requerido(xml, "xml", action), carpeta, compilar_despues,
                                       restaurar_si_falla)
+            if action == "crear_maquina_estados":
+                return _crear_maquina_estados(p, sw, requerido(especificacion, "especificacion", action), carpeta,
+                                              compilar_despues, restaurar_si_falla)
             if action == "crear_db_instancia":
                 return bloques.crear_db_instancia(sw, requerido(nombre, "nombre", action),
                                                   requerido(fb, "fb", action), numero)
             if action == "borrar_bloque":
                 return bloques.borrar(bloques.buscar(sw, requerido(nombre, "nombre", action)))
             raise accion_desconocida(action, ["crear_kop", "importar_scl", "importar_xml", "crear_db_instancia",
-                                              "borrar_bloque", "ayuda_kop"])
+                                              "borrar_bloque", "ayuda_kop", "crear_maquina_estados",
+                                              "ayuda_maquina_estados"])
         return await ctx.ejecutar(ejecutar)
 
     @servidor.tool(annotations=ESCRITURA)
@@ -147,3 +159,17 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
             objetivo = bloques.buscar(sw, requerido(nombre, "nombre", action)) if action == "bloque" else sw
             return compilar(ctx.sesion, objetivo).resumen()
         return await ctx.ejecutar(ejecutar)
+
+
+def _crear_maquina_estados(programador, sw, especificacion: dict, carpeta: str | None, compilar_despues: bool,
+                           restaurar_si_falla: bool) -> str:
+    try:
+        m = maquina_estados.leer_maquina(especificacion)
+    except maquina_estados.MaquinaInvalida as e:
+        raise EntradaInvalida(str(e)) from e
+    if m.lenguaje == "kop":
+        resultado = programador.crear_kop(sw, maquina_estados.a_kop(m), carpeta, compilar_despues, restaurar_si_falla)
+    else:
+        resultado = programador.importar_scl(sw, maquina_estados.a_scl(m), carpeta, compilar_despues,
+                                             restaurar_si_falla)
+    return f"{resultado}\n\nDiagrama de estados (Mermaid):\n{maquina_estados.diagrama_mermaid(m)}"

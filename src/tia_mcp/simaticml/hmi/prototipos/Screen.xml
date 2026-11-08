@@ -1,0 +1,32 @@
+<Hmi.Screen.Screen ID="0">
+  <AttributeList>
+    <ActiveLayer>0</ActiveLayer>
+    <BackColor>0, 0, 0</BackColor>
+    <GridColor>0, 0, 0</GridColor>
+    <Height>272</Height>
+    <Name>PROTOTIPO</Name>
+    <Number>37</Number>
+    <Visible>true</Visible>
+    <Width>480</Width>
+  </AttributeList>
+  <ObjectList>
+    <MultilingualText ID="1" CompositionName="HelpText">
+      <ObjectList>
+        <MultilingualTextItem ID="2" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <Text/>
+          </AttributeList>
+        </MultilingualTextItem>
+      </ObjectList>
+    </MultilingualText>
+    <Hmi.Screen.ScreenLayer ID="3" CompositionName="Layers">
+      <AttributeList>
+        <Index>0</Index>
+        <Name/>
+        <VisibleES>true</VisibleES>
+      </AttributeList>
+      <ObjectList/>
+    </Hmi.Screen.ScreenLayer>
+  </ObjectList>
+</Hmi.Screen.Screen>

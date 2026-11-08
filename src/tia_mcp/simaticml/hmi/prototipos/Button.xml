@@ -1,0 +1,94 @@
+<Hmi.Screen.Button ID="40" CompositionName="ScreenItems">
+  <AttributeList>
+    <BackColor>0, 255, 0</BackColor>
+    <BackFillStyle>GradientVertical</BackFillStyle>
+    <BitNumber>0</BitNumber>
+    <BorderBackColor>105, 105, 105</BorderBackColor>
+    <BorderColor>0, 0, 0</BorderColor>
+    <BorderWidth>2</BorderWidth>
+    <CornerRadius>8</CornerRadius>
+    <CornerStyle>Pointed</CornerStyle>
+    <EdgeStyle>Style3D</EdgeStyle>
+    <Enabled>true</Enabled>
+    <FirstGradientColor>51, 153, 102</FirstGradientColor>
+    <FirstGradientOffset>15</FirstGradientOffset>
+    <FitToLargest>false</FitToLargest>
+    <Flashing>None</Flashing>
+    <FocusColor>148, 182, 231</FocusColor>
+    <FocusWidth>2</FocusWidth>
+    <ForeColor>0, 0, 0</ForeColor>
+    <Height>24</Height>
+    <HorizontalAlignment>Center</HorizontalAlignment>
+    <HorizontalPictureAlignment>Center</HorizontalPictureAlignment>
+    <HotKey>0</HotKey>
+    <Left>0</Left>
+    <MiddleGradientColor>0, 255, 0</MiddleGradientColor>
+    <Mode>Text</Mode>
+    <ObjectName>PROTOTIPO</ObjectName>
+    <PictureAreaBottomMargin>0</PictureAreaBottomMargin>
+    <PictureAreaLeftMargin>0</PictureAreaLeftMargin>
+    <PictureAreaRightMargin>0</PictureAreaRightMargin>
+    <PictureAreaTopMargin>0</PictureAreaTopMargin>
+    <PictureAutoSizing>StretchPicture</PictureAutoSizing>
+    <SecondGradientColor>88, 90, 103</SecondGradientColor>
+    <SecondGradientOffset>15</SecondGradientOffset>
+    <TabIndex>2</TabIndex>
+    <TextAreaBottomMargin>0</TextAreaBottomMargin>
+    <TextAreaLeftMargin>0</TextAreaLeftMargin>
+    <TextAreaRightMargin>0</TextAreaRightMargin>
+    <TextAreaTopMargin>0</TextAreaTopMargin>
+    <TextOrientation>Horizontal</TextOrientation>
+    <Top>0</Top>
+    <UseDesignColorSchema>false</UseDesignColorSchema>
+    <UseFirstGradient>true</UseFirstGradient>
+    <UseSecondGradient>false</UseSecondGradient>
+    <UseTwoHandOperation>false</UseTwoHandOperation>
+    <VerticalAlignment>Middle</VerticalAlignment>
+    <VerticalPictureAlignment>Middle</VerticalPictureAlignment>
+    <Width>44</Width>
+  </AttributeList>
+  <ObjectList>
+    <Hmi.Globalization.MultiLingualFont ID="49" CompositionName="Font">
+      <ObjectList>
+        <Hmi.Globalization.FontItem ID="4A" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <FontFamily>Tahoma</FontFamily>
+            <FontSize>12</FontSize>
+            <FontStyle>Bold</FontStyle>
+          </AttributeList>
+        </Hmi.Globalization.FontItem>
+      </ObjectList>
+    </Hmi.Globalization.MultiLingualFont>
+    <MultilingualText ID="4B" CompositionName="HelpText">
+      <ObjectList>
+        <MultilingualTextItem ID="4C" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <Text/>
+          </AttributeList>
+        </MultilingualTextItem>
+      </ObjectList>
+    </MultilingualText>
+    <MultilingualText ID="4D" CompositionName="TextOff">
+      <ObjectList>
+        <MultilingualTextItem ID="4E" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <Text/>
+          </AttributeList>
+        </MultilingualTextItem>
+      </ObjectList>
+    </MultilingualText>
+    <MultilingualText ID="4F" CompositionName="TextOn">
+      <ObjectList>
+        <MultilingualTextItem ID="50" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <Text/>
+          </AttributeList>
+        </MultilingualTextItem>
+      </ObjectList>
+    </MultilingualText>
+  </ObjectList>
+</Hmi.Screen.Button>

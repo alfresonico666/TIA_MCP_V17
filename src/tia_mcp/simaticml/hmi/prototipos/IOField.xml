@@ -1,0 +1,64 @@
+<Hmi.Screen.IOField ID="39" CompositionName="ScreenItems">
+  <AttributeList>
+    <AboveUpperLimitColor>237, 88, 97</AboveUpperLimitColor>
+    <BackColor>255, 255, 255</BackColor>
+    <BackFillStyle>Solid</BackFillStyle>
+    <BelowLowerLimitColor>241, 161, 44</BelowLowerLimitColor>
+    <BorderBackColor>101, 103, 115</BorderBackColor>
+    <BorderColor>71, 73, 87</BorderColor>
+    <BorderWidth>4</BorderWidth>
+    <BottomMargin>2</BottomMargin>
+    <CornerRadius>3</CornerRadius>
+    <DataFormat>Decimal</DataFormat>
+    <EdgeStyle>Double</EdgeStyle>
+    <Enabled>true</Enabled>
+    <FieldLength>3</FieldLength>
+    <FitToLargest>false</FitToLargest>
+    <Flashing>None</Flashing>
+    <ForeColor>49, 52, 74</ForeColor>
+    <FormatPattern>999</FormatPattern>
+    <Height>28</Height>
+    <HiddenInput>false</HiddenInput>
+    <HorizontalAlignment>Center</HorizontalAlignment>
+    <Left>0</Left>
+    <LeftMargin>3</LeftMargin>
+    <Mode>InOutput</Mode>
+    <ObjectName>PROTOTIPO</ObjectName>
+    <RightMargin>2</RightMargin>
+    <ShiftDecimalPoint>0</ShiftDecimalPoint>
+    <ShowLeadingZeros>false</ShowLeadingZeros>
+    <TabIndex>1</TabIndex>
+    <TextOrientation>Horizontal</TextOrientation>
+    <Top>0</Top>
+    <TopMargin>2</TopMargin>
+    <Unit/>
+    <UseDesignColorSchema>false</UseDesignColorSchema>
+    <UseTwoHandOperation>false</UseTwoHandOperation>
+    <VerticalAlignment>Middle</VerticalAlignment>
+    <Width>43</Width>
+  </AttributeList>
+  <ObjectList>
+    <Hmi.Globalization.MultiLingualFont ID="3A" CompositionName="Font">
+      <ObjectList>
+        <Hmi.Globalization.FontItem ID="3B" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <FontFamily>Tahoma</FontFamily>
+            <FontSize>13</FontSize>
+            <FontStyle>Bold</FontStyle>
+          </AttributeList>
+        </Hmi.Globalization.FontItem>
+      </ObjectList>
+    </Hmi.Globalization.MultiLingualFont>
+    <MultilingualText ID="3C" CompositionName="HelpText">
+      <ObjectList>
+        <MultilingualTextItem ID="3D" CompositionName="Items">
+          <AttributeList>
+            <Culture>en-US</Culture>
+            <Text/>
+          </AttributeList>
+        </MultilingualTextItem>
+      </ObjectList>
+    </MultilingualText>
+  </ObjectList>
+</Hmi.Screen.IOField>

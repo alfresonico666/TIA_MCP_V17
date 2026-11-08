@@ -21,6 +21,7 @@ BIESTABLES = frozenset({"Sr", "Rs"})
 COMPARADORES = {"Eq": "==", "Ne": "<>", "Gt": ">", "Ge": ">=", "Lt": "<", "Le": "<="}
 _ELEMENTOS_DE_FLUJO = frozenset({"Contact", "O", "Not", *CONTACTOS_FLANCO, *CAJAS_FLANCO, *COMPARADORES})
 _AREAS = {"Input": "I", "Output": "Q", "Memory": "M", "PeripheryInput": "I:P", "PeripheryOutput": "Q:P"}
+MAX_LONGITUD_EXPRESION = 800  # caracteres; más que eso no es legible y puede crecer sin límite
 
 Conector = tuple  # ("powerrail",) | ("ident", uid) | ("name", uid, pin)
 
@@ -52,6 +53,7 @@ class RedFlgNet:
         self._piezas: dict[str, _Pieza] = {}
         self._origen_de: dict[Conector, Conector] = {}
         self._destinos_de: dict[Conector, list[Conector]] = {}
+        self._memoria: dict[tuple[str, str], str] = {}
         self.usos: list[Uso] = []
         self.llamadas: list[Llamada] = []
         self._leer_partes(hijo(flgnet, "Parts"))
@@ -172,6 +174,23 @@ class RedFlgNet:
         return self._salida(origen[1], origen[2])
 
     def _salida(self, uid: str, pin: str) -> str:
+        """Expresión de un pin de salida, memorizada.
+
+        Sin memoria, una red con ramas compartidas (la salida de una pieza alimenta a varias) se
+        recalcula una y otra vez: el tiempo crece de forma exponencial (en un proyecto real una red dejaba al
+        servidor colgado). También se protege contra ciclos y se recorta el texto muy largo.
+        """
+        clave = (uid, pin)
+        if clave in self._memoria:
+            return self._memoria[clave]
+        self._memoria[clave] = "…"  # marca de "en cálculo": si se vuelve a pedir es un ciclo
+        expresion = self._calcular_salida(uid, pin)
+        if len(expresion) > MAX_LONGITUD_EXPRESION:
+            expresion = expresion[:MAX_LONGITUD_EXPRESION] + " …"
+        self._memoria[clave] = expresion
+        return expresion
+
+    def _calcular_salida(self, uid: str, pin: str) -> str:
         pieza = self._piezas.get(uid)
         if pieza is None:
             return "?"

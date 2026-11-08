@@ -32,3 +32,13 @@ Tag git + GitHub Release `vN_DescripcionSinEspaciosNiAcentos` (ej. `v1_ServidorM
 - Export no sobrescribe: borrar el archivo antes. Bloques inconsistentes no se exportan: compilar antes.
 - PContact/NContact usan el pin `pre` (no `in`). Temporizadores/contadores/PID son `<Part Version=..>` con `<Instance>`.
 - OB nuevos de usuario: número libre ≥ 123 (o el fijo del tipo, p. ej. OB30 alarma cíclica).
+- Proyecto abierto en SOLO LECTURA (Secondary): **no permite Export** ("not permitted in a read-only context").
+  Para leer/aprender se abre la COPIA en modo normal y se cierra sin guardar.
+- Lector KOP: memoriza la expresión de cada pin (`flgnet._memoria`); sin eso, redes con ramas compartidas tardan
+  tiempo exponencial (un bloque de un proyecto real colgaba el servidor).
+- HMI (Siemens.Engineering.Hmi.dll): todo por XML Import/Export. **No** se puede crear la conexión HMI integrada ni
+  elegir la pantalla inicial (1 vez a mano; usar proyecto/plantilla base). Tags externos exigen que la conexión
+  exista. Nombres de tags HMI únicos en TODAS las tablas. Un import fallido puede invalidar el proyecto en la sesión.
+  Sin pretty_print en XML HMI (TIA muestra los espacios dentro de <body><p>).
+- KTP400 Basic: `6AV2 123-2DB03-0AX0/17.0.0.0`. Basic no admite por Openness: visor de alarmas ni popups.
+- Si el usuario tiene TIA abierto trabajando, conectar con `nueva_instancia=true` para no interferir.

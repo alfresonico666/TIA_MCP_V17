@@ -1,8 +1,9 @@
-"""Aprender de proyectos anteriores: exportar todo el programa y generar un perfil de estilo.
+"""Aprender de proyectos anteriores: exportar todo el programa (PLC y HMI) y generar un perfil de estilo.
 
-El proyecto se abre en SOLO LECTURA (desde una copia), se exportan bloques (XML y fuente
-SCL), UDT y tablas de variables a la carpeta de conocimiento y se cierra sin guardar.
-Claude lee después `PERFIL_ESTILO.md` y los ejemplos para programar "como el equipo".
+La COPIA del proyecto se abre en modo normal (Openness V17 no permite exportar en un proyecto abierto en
+solo lectura: "The operation is not permitted in a read-only context"), se exportan bloques (XML y fuente
+SCL), UDT, tablas de variables y todo lo de los paneles HMI a la carpeta de conocimiento, y se cierra
+SIN GUARDAR. Claude lee después `PERFIL_ESTILO.md` y los ejemplos para programar "como el equipo".
 """
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ from ..analisis.estilo import perfil
 from ..errores import EntradaInvalida, NoEncontrado
 from ..simaticml.lector import leer_bloque
 from ..simaticml.texto import bloque_como_texto
-from . import bloques, hardware, proyecto, tags, tipos
+from . import bloques, hardware, hmi, proyecto, tags, tipos
 from .compilacion import compilar
 from .sesion import SesionTia
 
@@ -30,8 +31,13 @@ def aprender(sesion: SesionTia, ruta: str, carpeta_desarchivado: str | None = No
         proyecto_tia = _desarchivar_sin_activar(sesion, origen, destino)
     else:
         archivo = sesion.guardia.exigir_permitida(origen)
+        abiertos = [str(p.Path.FullName) for p in sesion.tia.Projects]
+        if abiertos:
+            raise EntradaInvalida(
+                f"Para aprender hay que abrir la copia en modo normal y TIA ya tiene abierto {abiertos[0]}. "
+                f"Cierra ese proyecto o conecta una instancia propia (tia_sesion conectar nueva_instancia=true).")
         proyecto_tia = sesion.tia.Projects.Open(sesion.sis.FileInfo(str(archivo)), None,
-                                                sesion.eng.ProjectOpenMode.Secondary)
+                                                sesion.eng.ProjectOpenMode.Primary)
     nombre = str(proyecto_tia.Name)
     salida = sesion.config.dir_conocimiento / _seguro(nombre)
     try:
@@ -87,6 +93,12 @@ def _exportar_todo(sesion: SesionTia, salida: Path, nombre: str) -> list[str]:
         todos_tags += tags.todos(sesion, plc)
         informe.append(f"  {plc.Name}: {exportados} bloques exportados"
                        + (f"; omitidos (inconsistentes/protegidos): {', '.join(omitidos)}" if omitidos else ""))
+    try:
+        for _, panel in hmi.paneles(sesion):
+            informe += hmi.exportar(sesion, panel, salida / "HMI" / _seguro(str(panel.Name)))
+    except Exception as e:  # la HMI es un extra: no debe impedir aprender el PLC
+        log.warning("No se pudo exportar la HMI: %s", e)
+        informe.append(f"  HMI: no exportada ({e})")
     _guardar(salida / ARCHIVO_PERFIL, perfil(nombre, leidos, todos_tags))
     return informe
 

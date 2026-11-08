@@ -34,6 +34,10 @@ class Configuracion:
         return self.dir_tia / "PublicAPI" / "V17" / "Siemens.Engineering.dll"
 
     @property
+    def dll_openness_hmi(self) -> Path:
+        return self.dir_tia / "PublicAPI" / "V17" / "Siemens.Engineering.Hmi.dll"
+
+    @property
     def dir_dependencias_openness(self) -> Path:
         return self.dir_tia / "Bin" / "PublicAPI"
 

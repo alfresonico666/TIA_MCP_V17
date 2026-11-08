@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tia-mcp-v17"
-version = "0.1.0"
+version = "2.0.0"
 description = "Servidor MCP para TIA Portal V17 (Openness): KOP, SCL, diagnóstico, referencias cruzadas y aprendizaje de proyectos."
 readme = "README.md"
 license = "MIT"

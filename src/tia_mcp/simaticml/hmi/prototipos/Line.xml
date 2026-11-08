@@ -1,0 +1,24 @@
+<Hmi.Screen.Line ID="E2" CompositionName="ScreenItems">
+  <AttributeList>
+    <BackColor>255, 255, 255</BackColor>
+    <Color>255, 203, 0</Color>
+    <EndLeft>434</EndLeft>
+    <EndStyle>NoEnd</EndStyle>
+    <EndTop>44</EndTop>
+    <FillStyle>Transparent</FillStyle>
+    <Flashing>None</Flashing>
+    <Height>0</Height>
+    <Left>0</Left>
+    <LineEndShapeStyle>Round</LineEndShapeStyle>
+    <LineWidth>3</LineWidth>
+    <ObjectName>PROTOTIPO</ObjectName>
+    <StartLeft>147</StartLeft>
+    <StartStyle>NoEnd</StartStyle>
+    <StartTop>44</StartTop>
+    <Style>Solid</Style>
+    <TabIndex>-1</TabIndex>
+    <Top>0</Top>
+    <UseDesignColorSchema>false</UseDesignColorSchema>
+    <Width>287</Width>
+  </AttributeList>
+</Hmi.Screen.Line>

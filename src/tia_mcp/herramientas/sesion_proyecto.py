@@ -13,19 +13,20 @@ from .contexto import ESCRITURA, Contexto, accion_desconocida, requerido
 def registrar(servidor: MCPServer, ctx: Contexto) -> None:
     @servidor.tool(annotations=ESCRITURA)
     async def tia_sesion(action: Literal["estado", "conectar", "desconectar"], con_interfaz: bool = True,
-                         pid: int | None = None) -> str:
+                         pid: int | None = None, nueva_instancia: bool = False) -> str:
         """Conexión con TIA Portal V17. EMPIEZA AQUÍ.
 
         - estado: procesos de TIA abiertos, conexión, proyecto activo y rutas permitidas.
         - conectar: se adjunta al TIA abierto (o al `pid` indicado); si no hay, inicia TIA
-          (`con_interfaz`=false lo abre oculto, más rápido). La 1.ª vez TIA pide autorizar Openness:
-          el usuario debe responder "Sí a todo" en TIA.
+          (`con_interfaz`=false lo abre oculto, más rápido). `nueva_instancia`=true inicia un TIA propio
+          aunque el usuario tenga otro abierto (recomendado si el usuario está trabajando en TIA).
+          La 1.ª vez TIA pide autorizar Openness: el usuario debe responder "Sí a todo" en TIA.
         - desconectar: suelta TIA (si lo inició el servidor, lo cierra).
         """
         def ejecutar():
             s = ctx.sesion
             if action == "conectar":
-                return s.conectar(con_interfaz, pid)
+                return s.conectar(con_interfaz, pid, nueva_instancia)
             if action == "desconectar":
                 return s.desconectar()
             if action == "estado":

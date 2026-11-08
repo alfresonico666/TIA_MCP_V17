@@ -51,11 +51,15 @@ class SesionTia:
         return [ProcesoTia(int(p.Id), str(p.Mode), _ruta_o_none(p.ProjectPath))
                 for p in self.eng.TiaPortal.GetProcesses()]
 
-    def conectar(self, con_interfaz: bool = True, pid: int | None = None) -> str:
-        """Se adjunta a un TIA abierto (el indicado o el primero); si no hay, inicia uno."""
+    def conectar(self, con_interfaz: bool = True, pid: int | None = None, nueva_instancia: bool = False) -> str:
+        """Se adjunta a un TIA abierto (el indicado o el primero); si no hay, inicia uno.
+
+        `nueva_instancia`: inicia SIEMPRE un TIA propio aunque el usuario tenga otro abierto, para no
+        interferir con lo que él esté haciendo (p. ej. un proyecto original abierto).
+        """
         if self.conectado:
             return "Ya estaba conectado a TIA Portal."
-        procesos = list(self.eng.TiaPortal.GetProcesses())
+        procesos = [] if nueva_instancia else list(self.eng.TiaPortal.GetProcesses())
         elegido = next((p for p in procesos if pid is None or int(p.Id) == pid), None)
         if elegido is not None:
             # La primera vez TIA muestra un aviso de seguridad de Openness: "Sí a todo".
@@ -63,7 +67,7 @@ class SesionTia:
             self._iniciado_por_nosotros = False
             self._adoptar_proyecto_abierto()
             return f"Conectado al TIA abierto (PID {elegido.Id})."
-        if pid is not None:
+        if pid is not None and not nueva_instancia:
             raise ErrorTia(f"No hay un TIA Portal con PID {pid}.")
         modo = self.eng.TiaPortalMode.WithUserInterface if con_interfaz \
             else self.eng.TiaPortalMode.WithoutUserInterface
