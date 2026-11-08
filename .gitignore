@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Proyectos TIA y código de clientes: NUNCA al repositorio
+*.ap17
+*.zap17
+*.al17
+.pruebas/
+**/IM/
+**/System/
+**/TMP/
+**/Logs/
+*.plf
+
+# Local
+.env
+.env.*
+.vscode/
+*.log

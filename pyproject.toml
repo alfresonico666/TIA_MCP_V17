@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tia-mcp-v17"
+version = "0.1.0"
+description = "Servidor MCP para TIA Portal V17 (Openness): KOP, SCL, diagnóstico, referencias cruzadas y aprendizaje de proyectos."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10,<3.14"
+authors = [{ name = "alfresonico666" }]
+dependencies = [
+    "mcp>=2.3,<3",
+    "pythonnet>=3.0,<4",
+    "lxml>=5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+tia-mcp = "tia_mcp.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["tia: requiere TIA Portal V17 instalado (se omite si no está)"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "PL", "N", "RUF"]
+ignore = [
+    "PLR0913", "PLR0917",  # las herramientas MCP reciben muchos parámetros opcionales (siempre por nombre)
+    "PLR0911",  # despachadores por `action`: un return por acción es lo más legible
+    "N818",     # excepciones con nombres en español (ErrorTia, RutaNoPermitida...)
+    "PLR2004",  # números mágicos en tests
+    "RUF001", "RUF002", "RUF003",  # textos en español con acentos
+    "N802", "N806",  # nombres de tipos .NET (FileInfo, TiaPortal) importados en funciones
+]
