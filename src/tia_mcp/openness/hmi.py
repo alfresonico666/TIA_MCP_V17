@@ -163,6 +163,8 @@ def importar(sesion: SesionTia, hmi, tipo: str, xml: str) -> list[str]:
     composicion = {"pantalla": hmi.ScreenFolder.Screens, "plantilla": hmi.ScreenTemplateFolder.ScreenTemplates,
                    "tags": hmi.TagFolder.TagTables, "lista_textos": hmi.TextLists,
                    "conexion": hmi.Connections}[tipo]
+    if tipo == "pantalla":
+        _validar_numero_pantalla(sesion, hmi, xml)
     archivo = Path(tempfile.gettempdir()) / "tia_mcp" / f"importar_hmi_{tipo}.xml"
     archivo.parent.mkdir(parents=True, exist_ok=True)
     archivo.write_text(xml, encoding="utf-8")
@@ -171,6 +173,35 @@ def importar(sesion: SesionTia, hmi, tipo: str, xml: str) -> list[str]:
     except Exception as e:
         raise _error_importacion(sesion, tipo, e) from e
     return [str(o.Name) for o in importados]
+
+
+def numeros_de_pantalla(sesion: SesionTia, hmi) -> dict[str, int]:
+    """{nombre: número} de las pantallas. Openness no expone `Number` como atributo: se lee del export."""
+    resultado = {}
+    for pantalla, partes in _recorrer(hmi.ScreenFolder, "Screens"):
+        temporal = Path(tempfile.gettempdir()) / "tia_mcp" / f"num_{_seguro('_'.join(partes))}.xml"
+        if _exportar_objeto(sesion, pantalla, temporal, []):
+            numero = re.search(r"<Number>(\d+)</Number>", temporal.read_text(encoding="utf-8-sig"))
+            if numero:
+                resultado[str(pantalla.Name)] = int(numero.group(1))
+    return resultado
+
+
+def _validar_numero_pantalla(sesion: SesionTia, hmi, xml: str) -> None:
+    """TIA exige números de pantalla únicos y, si no, rechaza el import E INVALIDA el proyecto en la sesión:
+    se comprueba antes de importar."""
+    nombre = re.search(r"<Name>([^<]+)</Name>", xml)
+    numero = re.search(r"<Number>(\d+)</Number>", xml)
+    if not nombre or not numero:
+        return
+    existentes = numeros_de_pantalla(sesion, hmi)
+    ocupado_por = [n for n, num in existentes.items() if num == int(numero.group(1)) and n != nombre.group(1)]
+    if ocupado_por:
+        libre = next(i for i in range(1, 1000) if i not in existentes.values())
+        raise EntradaInvalida(
+            f"El número de pantalla {numero.group(1)} ya lo usa '{ocupado_por[0]}'. Los números deben ser únicos "
+            f"en el panel: usa por ejemplo {libre}. Pantallas actuales: "
+            + ", ".join(f"{n}={v}" for n, v in sorted(existentes.items(), key=lambda x: x[1])))
 
 
 def _error_importacion(sesion: SesionTia, tipo: str, error: Exception) -> ErrorTia:
@@ -193,7 +224,15 @@ def _error_importacion(sesion: SesionTia, tipo: str, error: Exception) -> ErrorT
             f"TIA rechazó la importación de {tipo}: ya existe un objeto con ese nombre. Los tags HMI deben tener "
             f"nombre ÚNICO en todas las tablas del panel (reemplazar solo funciona dentro de la misma tabla): usa "
             f"otro nombre o importa en la tabla donde ya está.{aviso}")
-    return OperacionTiaFallida(f"TIA rechazó la importación de {tipo}: {detalle}{aviso}")
+    return OperacionTiaFallida(f"TIA rechazó la importación de {tipo}: {_mensaje_tia(texto) or detalle}{aviso}")
+
+
+def _mensaje_tia(texto: str) -> str:
+    """Las líneas útiles del mensaje de TIA (la causa real suele venir en las líneas 2..n), sin la pila .NET."""
+    lineas = [linea.strip() for linea in texto.splitlines()]
+    utiles = [linea for linea in lineas if linea and not linea.startswith(("en ", "at ", "---"))
+              and "Error when calling method" not in linea]
+    return " | ".join(dict.fromkeys(utiles))[:1500]
 
 
 # --------------------------------------------------------------------------- compilar

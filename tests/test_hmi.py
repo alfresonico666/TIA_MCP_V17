@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pytest
 from lxml import etree
+from PIL import Image
 
 from tia_mcp.simaticml.hmi.generador import (
     EspecificacionHmiInvalida,
@@ -11,6 +12,7 @@ from tia_mcp.simaticml.hmi.generador import (
     tabla_tags_xml,
 )
 from tia_mcp.simaticml.hmi.lector import leer_pantalla, leer_tabla_tags, pantalla_como_texto
+from tia_mcp.simaticml.hmi.vista_previa import png_de_xml
 
 PANTALLA = {
     "nombre": "Principal", "numero": 1, "fondo": "0, 0, 0",
@@ -53,6 +55,7 @@ def test_pantalla_ida_y_vuelta():
     assert eventos == {"Press": ["SetBit(Cmd_Marcha)"], "Release": ["ResetBit(Cmd_Marcha)"]}
     assert objetos["Nav"].eventos[0].funciones == ["ActivateScreen(Diagnostico, 0)", "SetTag(Pantalla, 2)"]
     assert objetos["Led"].animaciones[0].startswith("RangeAppearance(Motor)")
+    assert "<FlashingType>No</FlashingType>" in xml
     assert objetos["Separador"].animaciones == ["Visibility(Motor)"]
     assert "TextList=Estilos" in objetos["Estilo"].tags
     assert objetos["Estilo"].atributos["Mode"] == "InOutput"
@@ -127,3 +130,11 @@ def test_lista_textos():
     entradas = doc.findall(".//Hmi.TextGraphicList.TextListEntry")
     assert [e.findtext("AttributeList/From") for e in entradas] == ["1", "2", "3"]
     assert ["".join(e.find(".//Text").itertext()) for e in entradas] == ["Banderas", "Moore", "Mealy"]
+
+
+def test_vista_previa_png(tmp_path):
+    destino = png_de_xml(pantalla_xml(PANTALLA), tmp_path / "p.png", escala=1, estado=1)
+    imagen = Image.open(destino)
+    assert imagen.size == (480, 272)
+    assert imagen.getpixel((316, 116)) == (0, 255, 0)  # círculo "Led" en estado 1 = verde
+    assert imagen.getpixel((5, 5)) == (0, 0, 0)        # fondo negro

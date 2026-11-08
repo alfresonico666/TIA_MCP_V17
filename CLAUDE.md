@@ -42,3 +42,7 @@ Tag git + GitHub Release `vN_DescripcionSinEspaciosNiAcentos` (ej. `v1_ServidorM
   Sin pretty_print en XML HMI (TIA muestra los espacios dentro de <body><p>).
 - KTP400 Basic: `6AV2 123-2DB03-0AX0/17.0.0.0`. Basic no admite por Openness: visor de alarmas ni popups.
 - Si el usuario tiene TIA abierto trabajando, conectar con `nueva_instancia=true` para no interferir.
+- Importar tags HMI externos cuya conexión NO existe **cierra la instancia de TIA** (no solo falla): nunca
+  "tantear"; `crear_tags` exige `conexion_confirmada=true`. Guardar el proyecto antes de pasos HMI arriesgados.
+- `Hmi.Screen.Screen` no expone `Number` por GetAttribute: se lee del export. Números de pantalla únicos.
+- Valores válidos de `FlashingType` en rangos de apariencia: `No`, `Medium` (no `Yes`).

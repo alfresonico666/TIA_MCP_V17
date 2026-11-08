@@ -126,10 +126,13 @@ de V17 (prototipos neutros en `simaticml/hmi/prototipos`).
 | **Leer una pantalla como texto** (objetos, posición, colores, fuente, eventos, animaciones, tags) | ✅ | Para copiar diseños de proyectos anteriores |
 | **Generar pantallas** desde JSON: rectángulo, texto, botón (Click/Press/Release: SetBit, ResetBit, InvertBit, ActivateScreen, SetTag), círculo, campo E/S, campo simbólico, fecha/hora, línea | ✅ | Importado y compilado en V17 |
 | Animaciones: color por valor (RangeAppearance) y visibilidad | ✅ | |
-| Tablas de **tags HMI** (externos simbólicos o internos) | ✅ | Externos: la conexión debe existir. Nombres únicos en todas las tablas |
+| Tablas de **tags HMI** (externos simbólicos o internos) | ✅ | Externos: la conexión debe existir — si no, **TIA se cierra** al importarlos; por eso `crear_tags` exige `conexion_confirmada`. Nombres únicos en todas las tablas |
 | **Listas de textos** (para campos simbólicos) | ✅ | |
 | Textos en todos los idiomas activos del proyecto | ✅ | Evita textos vacíos si el runtime arranca en otro idioma |
 | Compilar el panel / exportar todo el panel a XML (también en `aprender`) | ✅ | |
+| **Vista previa PNG** de una pantalla (desde JSON o desde el panel) | ✅ | Para revisar diseño y documentar sin abrir TIA |
+| Comprobación previa del **número de pantalla** (único por panel) | ✅ | Un import rechazado invalida el proyecto en la sesión: se evita antes |
+| Mensajes de error de importación con la **causa real** de TIA | ✅ | |
 | Imágenes, barras, interruptores, teclas de función | 🗺️ | Se agregan copiando un export real |
 | Visor de alarmas, popups, alarmas HMI | ❌ | No soportados por Openness en paneles Basic |
 | WinCC Unified, RT Professional | ❌ | Otra API |
@@ -164,3 +167,4 @@ de V17 (prototipos neutros en `simaticml/hmi/prototipos`).
 |---|---|
 | v1_ServidorMCPInicial | KOP, SCL, UDT, PID, red PROFINET, tags, análisis, aprender |
 | v2_SoporteHMIyEstilos | HMI (`tia_hmi`), máquinas de estados Moore/Mealy, instancia propia de TIA, `aprender` corregido (exporta en modo normal + HMI), lector KOP sin cuelgues en redes grandes |
+| v3_VistaPreviaYSeguridadHMI | Vista previa PNG de pantallas; `conexion_confirmada` (evita que TIA se cierre); número de pantalla validado antes de importar; parpadeo con `FlashingType=Medium` (valor real de V17); errores de importación con la causa de TIA |

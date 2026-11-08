@@ -9,7 +9,7 @@ from mcp.server.mcpserver import MCPServer
 from .. import formato
 from ..errores import EntradaInvalida
 from ..openness import hmi
-from ..simaticml.hmi import generador
+from ..simaticml.hmi import generador, vista_previa
 from .contexto import ESCRITURA, Contexto, accion_desconocida, requerido
 
 AYUDA_HMI = """Pantalla (crear_pantalla, `especificacion`):
@@ -37,18 +37,18 @@ Openness V17 NO crea la conexión HMI integrada ni elige la pantalla inicial: se
 
 def registrar(servidor: MCPServer, ctx: Contexto) -> None:
     acciones = ["paneles", "agregar_panel", "conectar_plc", "leer", "xml", "crear_pantalla", "crear_tags",
-                "crear_lista_textos", "importar_xml", "compilar", "exportar", "ayuda"]
+                "crear_lista_textos", "importar_xml", "compilar", "exportar", "vista_previa", "ayuda"]
 
     @servidor.tool(annotations=ESCRITURA)
     async def tia_hmi(action: Literal["paneles", "agregar_panel", "conectar_plc", "leer", "xml", "crear_pantalla",
                                       "crear_tags", "crear_lista_textos", "importar_xml", "compilar", "exportar",
-                                      "ayuda"],
+                                      "vista_previa", "ayuda"],
                       panel: str | None = None, plc: str | None = None, nombre: str | None = None,
                       referencia: str | None = None,
                       tipo: Literal["pantalla", "plantilla", "tags", "lista_textos", "conexion"] | None = None,
                       especificacion: dict[str, Any] | None = None, tags: list[dict[str, Any]] | None = None,
                       entradas: dict[str, str] | None = None, xml: str | None = None,
-                      carpeta: str | None = None) -> str:
+                      carpeta: str | None = None, conexion_confirmada: bool = False) -> str:
         """Paneles HMI WinCC Basic/Comfort (p. ej. KTP400 Basic). `panel` opcional si hay uno solo.
 
         - paneles: paneles con sus pantallas, plantillas, tablas de tags y listas de textos.
@@ -58,14 +58,25 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
           colores, eventos, animaciones, tags). Úsalo para aprender diseños de proyectos anteriores.
         - xml: SimaticML crudo de ese objeto.
         - crear_pantalla: `especificacion` JSON (ver action='ayuda'); reemplaza si ya existe.
-        - crear_tags: `nombre` (tabla) + `tags`. crear_lista_textos: `nombre` + `entradas`.
+        - crear_tags: `nombre` (tabla) + `tags`. Si algún tag usa `conexion`, pasa `conexion_confirmada`=true
+          SOLO si esa conexión HMI ya existe: importar tags con una conexión inexistente CIERRA TIA.
+          crear_lista_textos: `nombre` + `entradas`.
         - importar_xml: `tipo` + `xml` (SimaticML HMI completo).
         - compilar: compila el panel y devuelve errores/advertencias.
         - exportar: todo el panel a `carpeta` (XML).
+        - vista_previa: PNG de una pantalla en `carpeta`: desde `especificacion` (sin TIA) o desde la pantalla
+          `nombre` del panel. Úsalo para revisar el diseño y para enseñárselo al usuario.
         - ayuda: formato de las especificaciones.
         """
         if action == "ayuda":
             return AYUDA_HMI
+        if action == "vista_previa" and especificacion is not None:
+            try:
+                xml_spec = generador.pantalla_xml(especificacion)
+            except generador.EspecificacionHmiInvalida as e:
+                raise EntradaInvalida(str(e)) from e
+            destino = Path(requerido(carpeta, "carpeta", action)).expanduser() / f"{especificacion['nombre']}.png"
+            return f"Vista previa: {vista_previa.png_de_xml(xml_spec, destino)}"
 
         def ejecutar():
             s = ctx.sesion
@@ -96,7 +107,17 @@ def registrar(servidor: MCPServer, ctx: Contexto) -> None:
                 return hmi.compilar_panel(s, h).resumen()
             if action == "exportar":
                 return "\n".join(hmi.exportar(s, h, Path(requerido(carpeta, "carpeta", action)).expanduser()))
+            if action == "vista_previa":
+                pantalla = requerido(nombre, "nombre", action)
+                destino = Path(requerido(carpeta, "carpeta", action)).expanduser() / f"{pantalla}.png"
+                return f"Vista previa: {vista_previa.png_de_xml(hmi.xml_de(s, h, 'pantalla', pantalla), destino)}"
             ctx.exigir_escritura()
+            if action == "crear_tags" and any(t.get("conexion") for t in (tags or [])) and not conexion_confirmada:
+                raise EntradaInvalida(
+                    "Hay tags enlazados a una conexión HMI. Si la conexión no existe, TIA se CIERRA al importarlos "
+                    "(comprobado en V17). Pregunta al usuario si ya creó la conexión (Dispositivos y redes → "
+                    "Conexión HMI) y repite con conexion_confirmada=true; si no, crea los tags sin `conexion` "
+                    "(internos) para previsualizar.")
             parametros = {"especificacion": especificacion, "nombre": nombre, "tags": tags, "entradas": entradas,
                           "xml": xml, "tipo": tipo}
             tipo_import, contenido = _xml_a_importar(action, parametros, hmi.culturas_proyecto(s), acciones)

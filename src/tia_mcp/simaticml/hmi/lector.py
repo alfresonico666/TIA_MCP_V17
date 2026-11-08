@@ -38,6 +38,8 @@ class ObjetoHmi:
     eventos: list[Evento] = field(default_factory=list)
     animaciones: list[str] = field(default_factory=list)   # "Appearance(Motor_En_Marcha)"
     tags: list[str] = field(default_factory=list)          # tags de proceso / enlaces
+    crudos: dict[str, str] = field(default_factory=dict)   # todos los atributos tal como los exporta TIA
+    rangos: list[tuple[str, str, str]] = field(default_factory=list)  # (valor, fondo, texto) de RangeAppearance
 
 
 @dataclass
@@ -103,6 +105,7 @@ def _leer_objeto(nodo) -> ObjetoHmi:
         x=_entero(valores.get("Left")), y=_entero(valores.get("Top")),
         ancho=_entero(valores.get("Width")), alto=_entero(valores.get("Height")),
         atributos={k: v for k, v in valores.items() if k in _ATRIBUTOS_RESUMEN and v},
+        crudos=valores,
     )
     objetos = hijo(nodo, "ObjectList")
     objeto.texto = _texto_visible(objetos)
@@ -117,6 +120,9 @@ def _leer_objeto(nodo) -> ObjetoHmi:
             objeto.eventos.append(_leer_evento(hijo_obj))
         elif etiqueta.startswith("Hmi.Dynamic."):
             objeto.animaciones.append(_leer_animacion(hijo_obj))
+            for rango in hijo_obj.iter("{*}Hmi.Dynamic.Range", "Hmi.Dynamic.Range"):
+                a = {local(x): (x.text or "") for x in hijos_todos(hijo(rango, "AttributeList"))}
+                objeto.rangos.append((a.get("LowerLimit", ""), a.get("BackColor", ""), a.get("ForeColor", "")))
     return objeto
 
 

@@ -299,7 +299,7 @@ def _animaciones(spec: dict) -> list:
             valor, fondo, *resto = rango
             r = etree.SubElement(lista, "Hmi.Dynamic.Range", ID="0", CompositionName="RangeValues")
             texto = resto[0] if resto else fondo
-            _attrs(r, BackColor=_color(fondo), FlashingType="Yes" if spec.get("parpadeo_en") == valor else "No",
+            _attrs(r, BackColor=_color(fondo), FlashingType="Medium" if spec.get("parpadeo_en") == valor else "No",
                    ForeColor=_color(texto), LowerLimit=str(valor), UpperLimit=str(valor))
         resultado.append(anim)
     if "visible_si" in spec:

@@ -67,7 +67,7 @@ Habla con Claude en lenguaje natural, por ejemplo:
 - *"Lee la pantalla HOME del KTP400 y hazme una pantalla de diagnóstico con el mismo diseño"*
 - *"Haz el arranque/paro del motor como máquina de estados Moore en KOP (Reposo, Marcha, Falla)"*
 
-### Herramientas (13 herramientas, 76 acciones)
+### Herramientas (13 herramientas, 77 acciones)
 
 | Herramienta | Para qué |
 |---|---|
@@ -83,7 +83,7 @@ Habla con Claude en lenguaje natural, por ejemplo:
 | `tia_tecnologia` | PID_Compact / PID_3Step / PID_Temp y sus parámetros |
 | `tia_analisis` | Referencias cruzadas, árbol de llamadas, diagnóstico |
 | `tia_conocimiento` | Aprender de proyectos anteriores (PLC + HMI) y leer su perfil de estilo |
-| `tia_hmi` | Paneles HMI: agregar, red, pantallas/tags/listas desde JSON, leer diseño, compilar, exportar |
+| `tia_hmi` | Paneles HMI: agregar, red, pantallas/tags/listas desde JSON, leer diseño, vista previa PNG, compilar, exportar |
 
 ## Configuración (variables de entorno opcionales)
 
