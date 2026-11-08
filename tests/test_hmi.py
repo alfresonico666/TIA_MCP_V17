@@ -138,3 +138,18 @@ def test_vista_previa_png(tmp_path):
     assert imagen.size == (480, 272)
     assert imagen.getpixel((316, 116)) == (0, 255, 0)  # círculo "Led" en estado 1 = verde
     assert imagen.getpixel((5, 5)) == (0, 0, 0)        # fondo negro
+
+
+def test_rectangulo_esquinas_redondeadas_o_rectas():
+    xml = pantalla_xml({"nombre": "P", "objetos": [
+        {"tipo": "rectangulo", "nombre": "Tarjeta", "radio_esquina": 12},
+        {"tipo": "rectangulo", "nombre": "Recto"}]})
+    objetos = _por_nombre(leer_pantalla(xml))
+    tarjeta = objetos["Tarjeta"].crudos
+    assert (tarjeta["RoundCornerWidth"], tarjeta["RoundCornerHeight"]) == ("12", "12")
+    assert objetos["Recto"].crudos["RoundCornerWidth"] == "0"
+
+
+def test_tamano_de_pantalla_ktp700():
+    p = leer_pantalla(pantalla_xml({"nombre": "P", "ancho": 800, "alto": 480, "objetos": []}))
+    assert (p.ancho, p.alto) == (800, 480)

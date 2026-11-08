@@ -126,6 +126,8 @@ de V17 (prototipos neutros en `simaticml/hmi/prototipos`).
 | **Leer una pantalla como texto** (objetos, posición, colores, fuente, eventos, animaciones, tags) | ✅ | Para copiar diseños de proyectos anteriores |
 | **Generar pantallas** desde JSON: rectángulo, texto, botón (Click/Press/Release: SetBit, ResetBit, InvertBit, ActivateScreen, SetTag), círculo, campo E/S, campo simbólico, fecha/hora, línea | ✅ | Importado y compilado en V17 |
 | Animaciones: color por valor (RangeAppearance) y visibilidad | ✅ | |
+| Tamaño de pantalla por panel (`ancho`/`alto`: KTP400 480x272, KTP700/900 800x480) y rectángulos con esquinas redondeadas (`radio_esquina`) | ✅ | |
+| Cambiar el modelo de panel (KTP400 → KTP700) | ❌ | Openness V17 no tiene API de "cambiar dispositivo": se hace en TIA (clic derecho → Cambiar dispositivo), conserva conexión y tags |
 | Tablas de **tags HMI** (externos simbólicos o internos) | ✅ | Externos: la conexión debe existir — si no, **TIA se cierra** al importarlos; por eso `crear_tags` exige `conexion_confirmada`. Nombres únicos en todas las tablas |
 | **Listas de textos** (para campos simbólicos) | ✅ | |
 | Textos en todos los idiomas activos del proyecto | ✅ | Evita textos vacíos si el runtime arranca en otro idioma |
@@ -168,3 +170,4 @@ de V17 (prototipos neutros en `simaticml/hmi/prototipos`).
 | v1_ServidorMCPInicial | KOP, SCL, UDT, PID, red PROFINET, tags, análisis, aprender |
 | v2_SoporteHMIyEstilos | HMI (`tia_hmi`), máquinas de estados Moore/Mealy, instancia propia de TIA, `aprender` corregido (exporta en modo normal + HMI), lector KOP sin cuelgues en redes grandes |
 | v3_VistaPreviaYSeguridadHMI | Vista previa PNG de pantallas; `conexion_confirmada` (evita que TIA se cierre); número de pantalla validado antes de importar; parpadeo con `FlashingType=Medium` (valor real de V17); errores de importación con la causa de TIA |
+| v4_HmiKtp700YTarjetas | Tamaño de pantalla configurable (KTP700 800x480), rectángulos redondeados (`RoundCornerWidth/Height`; antes heredaban 10x15 del prototipo) y vista previa coherente |

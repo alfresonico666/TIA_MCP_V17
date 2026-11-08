@@ -69,6 +69,11 @@ def pantalla_xml(especificacion: dict, culturas: tuple[str, ...] = CULTURAS_POR_
     _poner(attrs, "Name", nombre)
     _poner(attrs, "Number", str(especificacion.get("numero", 1)))
     _poner(attrs, "BackColor", _color(especificacion.get("fondo", "0, 0, 0")))
+    # Tamaño del panel: KTP400 = 480x272 (prototipo), KTP700 = 800x480, KTP900 = 800x480, KTP1200 = 1280x800.
+    if "ancho" in especificacion:
+        _poner(attrs, "Width", str(int(especificacion["ancho"])))
+    if "alto" in especificacion:
+        _poner(attrs, "Height", str(int(especificacion["alto"])))
     _ajustar_textos_culturas(pantalla, culturas)
     capa = pantalla.find("ObjectList/Hmi.Screen.ScreenLayer/ObjectList")
     nombres_usados: set[str] = set()
@@ -168,6 +173,11 @@ def _colores_y_bordes(attrs, spec: dict, tipo: str) -> None:
         _poner(attrs, "BorderWidth", str(int(spec["grosor_borde"])), solo_si_existe=True)
     if "radio_esquina" in spec:
         _poner(attrs, "CornerRadius", str(int(spec["radio_esquina"])), solo_si_existe=True)
+    if tipo == "rectangulo":
+        # El rectángulo usa RoundCornerWidth/Height (el prototipo trae 10x15 del export de origen): 0 = recto.
+        radio = str(int(spec.get("radio_esquina", 0)))
+        _poner(attrs, "RoundCornerWidth", radio, solo_si_existe=True)
+        _poner(attrs, "RoundCornerHeight", radio, solo_si_existe=True)
     if "alineacion" in spec:
         _poner(attrs, "HorizontalAlignment",
                {"izquierda": "Left", "centro": "Center", "derecha": "Right"}.get(spec["alineacion"],

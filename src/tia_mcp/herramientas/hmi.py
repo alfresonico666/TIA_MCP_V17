@@ -13,7 +13,8 @@ from ..simaticml.hmi import generador, vista_previa
 from .contexto import ESCRITURA, Contexto, accion_desconocida, requerido
 
 AYUDA_HMI = """Pantalla (crear_pantalla, `especificacion`):
-{"nombre": "Principal", "numero": 1, "fondo": "0, 0, 0", "objetos": [OBJETO, ...]}
+{"nombre": "Principal", "numero": 1, "fondo": "0, 0, 0", "ancho": 800, "alto": 480, "objetos": [OBJETO, ...]}
+(ancho/alto: 480x272 KTP400 por defecto; 800x480 KTP700/KTP900)
 OBJETO (x, y, ancho, alto en píxeles; KTP400 = 480x272):
  {"tipo": "rectangulo", "fondo": "247, 243, 247", "borde": "24, 28, 49", "grosor_borde": 1}
  {"tipo": "texto", "texto": "TITULO", "fuente": {"tamano": 24, "estilo": "Bold, Italic"}, "color": "49, 52, 74",

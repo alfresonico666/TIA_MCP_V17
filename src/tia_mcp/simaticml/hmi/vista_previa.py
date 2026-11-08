@@ -37,7 +37,7 @@ def _dibujar_objeto(d: ImageDraw.ImageDraw, o: ObjetoHmi, k: int, estado: int | 
     transparente = c.get("BackFillStyle") == "Transparent"
     borde = _rgb(c.get("BorderColor"), None)
     grosor = int(c.get("BorderWidth") or 0) * k
-    radio = int(c.get("CornerRadius") or 0) * k
+    radio = int(c.get("CornerRadius") or c.get("RoundCornerWidth") or 0) * k
     if o.tipo == "Line":
         puntos = [int(c.get(n) or 0) * k for n in ("StartLeft", "StartTop", "EndLeft", "EndTop")]
         d.line(puntos, fill=_rgb(c.get("Color"), (255, 255, 255)), width=max(1, int(c.get("LineWidth") or 1) * k))
